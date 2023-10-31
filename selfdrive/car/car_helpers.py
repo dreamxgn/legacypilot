@@ -199,6 +199,7 @@ def get_car(logcan, sendcan, experimental_long_allowed, num_pandas=1):
     cloudlog.event("car doesn't match any fingerprints", fingerprints=fingerprints, error=True)
     candidate = "mock"
 
+  candidate="VOLKSWAGEN TIGUAN 2ND GEN"
   CarInterface, CarController, CarState = interfaces[candidate]
   CP = CarInterface.get_params(candidate, fingerprints, car_fw, experimental_long_allowed, docs=False)
   CP.carVin = vin
