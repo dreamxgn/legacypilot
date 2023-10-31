@@ -145,7 +145,7 @@ elif arch == "earch64":
 
 else:
   cflags = []
-  cxxflags = []
+  cxxflags = ['-Wno-error=deprecated-declarations']
   cpppath = []
   rpath += [
     Dir("#cereal").abspath,

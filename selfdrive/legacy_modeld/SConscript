@@ -79,7 +79,11 @@ if use_thneed and arch in ("earch64", "larch64"):
   cmd = f"cd {Dir('.').abspath} && {compiler[0].abspath} models/supercombo.dlc models/supercombo.thneed --binary"
 
   lib_paths = ':'.join(Dir(p).abspath for p in lenv["LIBPATH"])
-  cenv = Environment(ENV={'LD_LIBRARY_PATH': f"{lib_paths}:{lenv['ENV']['LD_LIBRARY_PATH']}"})
+  kernel_path = os.path.join(Dir('.').abspath, "thneed", "kernels")
+
+  #cenv = Environment(ENV={'LD_LIBRARY_PATH': f"{lib_paths}:{lenv['ENV']['LD_LIBRARY_PATH']}", 'KERNEL_PATH': kernel_path})
+
+  cenv = Environment(ENV={'LD_LIBRARY_PATH': f"{lib_paths}:{lenv['ENV']['LD_LIBRARY_PATH']}",'KERNEL_PATH': kernel_path})
   cenv.Command("models/supercombo.thneed", ["models/supercombo.dlc", compiler], cmd)
 
 lenv.Program('_modeld', [
