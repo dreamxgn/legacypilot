@@ -175,7 +175,7 @@ function two_init {
 
   # Check for NEOS update
   if [ -f /LEECO ] && [ $(< /VERSION) != "$REQUIRED_NEOS_VERSION" ]; then
-    echo "Installing NEOS update"
+    echo "${VERSION} Installing NEOS update"
     NEOS_PY="$DIR/system/hardware/eon/neos.py"
     MANIFEST="$DIR/system/hardware/eon/neos.json"
     $NEOS_PY --swap-if-ready $MANIFEST
