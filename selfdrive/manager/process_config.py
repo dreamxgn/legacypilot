@@ -43,10 +43,10 @@ procs = [
   # PythonProcess("micd", "system.micd", callback=iscar),
   # PythonProcess("timezoned", "system.timezoned", enabled=not PC, offroad=True),
 
-  DaemonProcess("manage_athenad", "selfdrive.athena.manage_athenad", "AthenadPid"),
+  #DaemonProcess("manage_athenad", "selfdrive.athena.manage_athenad", "AthenadPid"),
   #NativeProcess("dmonitoringmodeld", "selfdrive/hybrid_modeld", ["./dmonitoringmodeld"], enabled=(not PC or WEBCAM), callback=driverview),
-  # NativeProcess("encoderd", "system/loggerd", ["./encoderd"]),
-  # NativeProcess("stream_encoderd", "system/loggerd", ["./encoderd", "--stream"], onroad=False, callback=notcar),
+  #NativeProcess("encoderd", "system/loggerd", ["./encoderd"]),
+  #NativeProcess("stream_encoderd", "system/loggerd", ["./encoderd", "--stream"], onroad=False, callback=notcar),
   NativeProcess("loggerd", "selfdrive/loggerd", ["./loggerd"], onroad=False, callback=logging),
   NativeProcess("modeld", "selfdrive/hybrid_modeld" if not Params().get_bool("dp_0813") else "selfdrive/legacy_modeld", ["./modeld"]),
   # NativeProcess("mapsd", "selfdrive/navd", ["./mapsd"]),
