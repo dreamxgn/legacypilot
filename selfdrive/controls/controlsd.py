@@ -69,7 +69,7 @@ class Controls:
       self.pm = messaging.PubMaster(['sendcan', 'controlsState', 'carState',
                                      'carControl', 'carEvents', 'carParams'])
 
-    self.camera_packets = ["roadCameraState","driverCameraState"]
+    self.camera_packets = ["roadCameraState", "driverCameraState"]
 
     can_timeout = None if os.environ.get('NO_CAN_TIMEOUT', False) else 20
     self.can_sock = messaging.sub_sock('can', timeout=can_timeout)
@@ -82,11 +82,11 @@ class Controls:
     self.dp_0813 = self.params.get_bool("dp_0813")
     self.sm = sm
     if self.sm is None:
-      ignore = ['testJoystick','driverMonitoringState']
+      ignore = ['testJoystick']
       if SIMULATION:
         ignore += ['driverCameraState', 'managerState']
       self.sm = messaging.SubMaster(['deviceState', 'pandaStates', 'peripheralState', 'modelV2', 'liveCalibration',
-                                     'driverMonitoringState','longitudinalPlan', 'lateralPlan', 'liveLocationKalman',
+                                     'driverMonitoringState', 'longitudinalPlan', 'lateralPlan', 'liveLocationKalman',
                                      'managerState', 'liveParameters', 'radarState', 'liveTorqueParameters', 'testJoystick'] + self.camera_packets,
                                     ignore_alive=ignore, ignore_avg_freq=['radarState', 'testJoystick'])
 
@@ -248,12 +248,11 @@ class Controls:
     if CS.brakePressed and CS.standstill:
       self.events.add(EventName.preEnableStandstill)
 
-    #踩下油门时切换驾驶员控制
     if CS.gasPressed:
       self.events.add(EventName.gasPressedOverride)
 
-    #if not self.CP.notCar:
-    #  self.events.add_from_msg(self.sm['driverMonitoringState'].events)
+    if not self.CP.notCar:
+      self.events.add_from_msg(self.sm['driverMonitoringState'].events)
 
     # Add car events, ignore if CAN isn't valid
     if CS.canValid:
@@ -354,7 +353,7 @@ class Controls:
       self.events.add(EventName.canError)
 
     # generic catch-all. ideally, a more specific event should be added above instead
-    can_rcv_timeout = self.can_rcv_timeout_counter >= 5 #can信号超时
+    can_rcv_timeout = self.can_rcv_timeout_counter >= 5
     has_disable_events = self.events.contains(ET.NO_ENTRY) and (self.events.contains(ET.SOFT_DISABLE) or self.events.contains(ET.IMMEDIATE_DISABLE))
     no_system_errors = (not has_disable_events) or (len(self.events) == num_events)
     if (not self.sm.all_checks() or can_rcv_timeout) and no_system_errors:
@@ -757,9 +756,8 @@ class Controls:
       else:
         self.steer_limited = abs(CC.actuators.steer - CC.actuatorsOutput.steer) > 1e-2
 
-    #force_decel = (self.sm['driverMonitoringState'].awarenessStatus < 0.) or \
-    #              (self.state == State.softDisabling)
-    force_decel = self.state == State.softDisabling
+    force_decel = (self.sm['driverMonitoringState'].awarenessStatus < 0.) or \
+                  (self.state == State.softDisabling)
 
     # Curvature & Steering angle
     lp = self.sm['liveParameters']
