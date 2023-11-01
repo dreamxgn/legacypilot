@@ -35,24 +35,39 @@ def qcomgps(started, params, CP: car.CarParams) -> bool:
   return started and not ublox_available()
 
 procs = [
+  
+  #获取摄像头视频流数据
   NativeProcess("camerad", "selfdrive/camerad", ["./camerad"], callback=driverview),
+  
   NativeProcess("clocksd", "system/clocksd", ["./clocksd"]),
   NativeProcess("logcatd", "system/logcatd", ["./logcatd"]),
   NativeProcess("proclogd", "system/proclogd", ["./proclogd"]),
+  
+  #接收日志并写到文件,通过IPC重新发送。
   PythonProcess("logmessaged", "system.logmessaged", offroad=True),
+  
   # PythonProcess("micd", "system.micd", callback=iscar),
   # PythonProcess("timezoned", "system.timezoned", enabled=not PC, offroad=True),
 
   DaemonProcess("manage_athenad", "selfdrive.athena.manage_athenad", "AthenadPid"),
+  
+  #运行驾驶员监控模型获取驾驶员状态
   NativeProcess("dmonitoringmodeld", "selfdrive/hybrid_modeld", ["./dmonitoringmodeld"], enabled=(not PC or WEBCAM), callback=driverview),
+  
   #NativeProcess("encoderd", "system/loggerd", ["./encoderd"]),
   #NativeProcess("stream_encoderd", "system/loggerd", ["./encoderd", "--stream"], onroad=False, callback=notcar),
   NativeProcess("loggerd", "selfdrive/loggerd", ["./loggerd"], onroad=False, callback=logging),
+  
+  #驾驶控制预测模型,根据道路情况预测控制。
   NativeProcess("modeld", "selfdrive/hybrid_modeld" if not Params().get_bool("dp_0813") else "selfdrive/legacy_modeld", ["./modeld"]),
+  
   # NativeProcess("mapsd", "selfdrive/navd", ["./mapsd"]),
   # NativeProcess("navmodeld", "selfdrive/modeld", ["./navmodeld"]),
   NativeProcess("sensord", "system/sensord", ["./sensord"], enabled=not PC, offroad=EON),
+  
+  #驾驶控制接口
   NativeProcess("ui", "selfdrive/ui", ["./ui"], offroad=True, watchdog_max_dt=(5 if not PC else None)),
+  
   NativeProcess("soundd", "selfdrive/ui/soundd", ["./soundd"]),
   NativeProcess("locationd", "selfdrive/locationd", ["./locationd"]),
   NativeProcess("boardd", "selfdrive/boardd", ["./boardd"], enabled=False),
@@ -60,7 +75,10 @@ procs = [
   PythonProcess("torqued", "selfdrive.locationd.torqued"),
   PythonProcess("controlsd", "selfdrive.controls.controlsd"),
   PythonProcess("deleter", "selfdrive.loggerd.deleter", offroad=True),
+  
+  #驾驶员状态管理- 发布 driverMonitoringState
   PythonProcess("dmonitoringd", "selfdrive.legacy_monitoring.dmonitoringd", enabled=(not PC or WEBCAM), callback=driverview),
+  
   # PythonProcess("laikad", "selfdrive.locationd.laikad"),
   # PythonProcess("rawgpsd", "system.sensord.rawgps.rawgpsd", enabled=TICI, onroad=False, callback=qcomgps),
   # PythonProcess("navd", "selfdrive.navd.navd"),
