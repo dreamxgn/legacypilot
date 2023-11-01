@@ -18,6 +18,7 @@ FRAME_FINGERPRINT = 100  # 1s
 
 EventName = car.CarEvent.EventName
 
+CAR_SELECTED='VOLKSWAGEN TIGUAN 2ND GEN'
 
 def get_startup_event(car_recognized, controller_available, fw_seen):
   #if is_comma_remote() and is_tested_branch():
@@ -126,6 +127,11 @@ def fingerprint(logcan, sendcan, num_pandas):
   params = Params()
 
   start_time = time.monotonic()
+  
+  #车型和can指纹
+  fixed_fingerprint = CAR_SELECTED
+  skip_fw_query = True
+  
   if not skip_fw_query:
     # Vin query only reliably works through OBDII
     bus = 1
@@ -167,7 +173,7 @@ def fingerprint(logcan, sendcan, num_pandas):
   params.put_bool("FirmwareQueryDone", True)
 
   fw_query_time = time.monotonic() - start_time
-
+  
   # CAN fingerprint
   # drain CAN socket so we get the latest messages
   messaging.drain_sock_raw(logcan)
@@ -199,7 +205,6 @@ def get_car(logcan, sendcan, experimental_long_allowed, num_pandas=1):
     cloudlog.event("car doesn't match any fingerprints", fingerprints=fingerprints, error=True)
     candidate = "mock"
 
-  candidate="VOLKSWAGEN TIGUAN 2ND GEN"
   CarInterface, CarController, CarState = interfaces[candidate]
   CP = CarInterface.get_params(candidate, fingerprints, car_fw, experimental_long_allowed, docs=False)
   CP.carVin = vin
