@@ -82,7 +82,7 @@ class Controls:
     self.dp_0813 = self.params.get_bool("dp_0813")
     self.sm = sm
     if self.sm is None:
-      ignore = ['testJoystick']
+      ignore = ['testJoystick','driverMonitoringState']
       if SIMULATION:
         ignore += ['driverCameraState', 'managerState']
       self.sm = messaging.SubMaster(['deviceState', 'pandaStates', 'peripheralState', 'modelV2', 'liveCalibration',
@@ -756,8 +756,10 @@ class Controls:
       else:
         self.steer_limited = abs(CC.actuators.steer - CC.actuatorsOutput.steer) > 1e-2
 
-    force_decel = (self.sm['driverMonitoringState'].awarenessStatus < 0.) or \
-                  (self.state == State.softDisabling)
+    #force_decel = (self.sm['driverMonitoringState'].awarenessStatus < 0.) or \
+    #              (self.state == State.softDisabling)
+    
+    force_decel = self.state == State.softDisabling
 
     # Curvature & Steering angle
     lp = self.sm['liveParameters']

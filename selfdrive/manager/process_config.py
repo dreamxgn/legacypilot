@@ -44,7 +44,7 @@ procs = [
   # PythonProcess("timezoned", "system.timezoned", enabled=not PC, offroad=True),
 
   DaemonProcess("manage_athenad", "selfdrive.athena.manage_athenad", "AthenadPid"),
-  NativeProcess("dmonitoringmodeld", "selfdrive/hybrid_modeld", ["./dmonitoringmodeld"], enabled=(not PC or WEBCAM), callback=driverview),
+  #NativeProcess("dmonitoringmodeld", "selfdrive/hybrid_modeld", ["./dmonitoringmodeld"], enabled=(not PC or WEBCAM), callback=driverview),
   # NativeProcess("encoderd", "system/loggerd", ["./encoderd"]),
   # NativeProcess("stream_encoderd", "system/loggerd", ["./encoderd", "--stream"], onroad=False, callback=notcar),
   NativeProcess("loggerd", "selfdrive/loggerd", ["./loggerd"], onroad=False, callback=logging),
@@ -60,7 +60,7 @@ procs = [
   PythonProcess("torqued", "selfdrive.locationd.torqued"),
   PythonProcess("controlsd", "selfdrive.controls.controlsd"),
   PythonProcess("deleter", "selfdrive.loggerd.deleter", offroad=True),
-  PythonProcess("dmonitoringd", "selfdrive.legacy_monitoring.dmonitoringd", enabled=(not PC or WEBCAM), callback=driverview),
+  # PythonProcess("dmonitoringd", "selfdrive.legacy_monitoring.dmonitoringd", enabled=(not PC or WEBCAM), callback=driverview),
   # PythonProcess("laikad", "selfdrive.locationd.laikad"),
   # PythonProcess("rawgpsd", "system.sensord.rawgps.rawgpsd", enabled=TICI, onroad=False, callback=qcomgps),
   # PythonProcess("navd", "selfdrive.navd.navd"),
