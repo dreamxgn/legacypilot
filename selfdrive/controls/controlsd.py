@@ -69,7 +69,7 @@ class Controls:
       self.pm = messaging.PubMaster(['sendcan', 'controlsState', 'carState',
                                      'carControl', 'carEvents', 'carParams'])
 
-    self.camera_packets = ["roadCameraState"]
+    self.camera_packets = ["roadCameraState","driverCameraState"]
 
     can_timeout = None if os.environ.get('NO_CAN_TIMEOUT', False) else 20
     self.can_sock = messaging.sub_sock('can', timeout=can_timeout)
@@ -82,11 +82,11 @@ class Controls:
     self.dp_0813 = self.params.get_bool("dp_0813")
     self.sm = sm
     if self.sm is None:
-      ignore = ['testJoystick','driverCameraState','driverMonitoringState']
+      ignore = ['testJoystick','driverMonitoringState']
       if SIMULATION:
         ignore += ['driverCameraState', 'managerState']
       self.sm = messaging.SubMaster(['deviceState', 'pandaStates', 'peripheralState', 'modelV2', 'liveCalibration',
-                                     'longitudinalPlan', 'lateralPlan', 'liveLocationKalman',
+                                     'driverMonitoringState','longitudinalPlan', 'lateralPlan', 'liveLocationKalman',
                                      'managerState', 'liveParameters', 'radarState', 'liveTorqueParameters', 'testJoystick'] + self.camera_packets,
                                     ignore_alive=ignore, ignore_avg_freq=['radarState', 'testJoystick'])
 
