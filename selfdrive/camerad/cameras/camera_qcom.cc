@@ -267,28 +267,8 @@ void cameras_init(VisionIpcServer *v, MultiCameraState *s, cl_device_id device_i
               VISION_STREAM_RGB_ROAD, VISION_STREAM_ROAD);
   s->road_cam.apply_exposure = imx298_apply_exposure;
 
-  if (s->device == DEVICE_OP3T) {
-    camera_init(v, &s->driver_cam, CAMERA_ID_S5K3P8SP, 1,
-                /*pixel_clock=*/560000000, /*line_length_pclk=*/5120,
-                /*max_gain=*/510, 10, device_id, ctx,
-                VISION_STREAM_RGB_DRIVER, VISION_STREAM_DRIVER);
-    s->driver_cam.apply_exposure = imx179_s5k3p8sp_apply_exposure;
-  } else if (s->device == DEVICE_LP3) {
-    camera_init(v, &s->driver_cam, CAMERA_ID_OV8865, 1,
-                /*pixel_clock=*/72000000, /*line_length_pclk=*/1602,
-                /*max_gain=*/510, 10, device_id, ctx,
-                VISION_STREAM_RGB_DRIVER, VISION_STREAM_DRIVER);
-    s->driver_cam.apply_exposure = ov8865_apply_exposure;
-  } else {
-    camera_init(v, &s->driver_cam, CAMERA_ID_IMX179, 1,
-                /*pixel_clock=*/251200000, /*line_length_pclk=*/3440,
-                /*max_gain=*/224, 20, device_id, ctx,
-                VISION_STREAM_RGB_DRIVER, VISION_STREAM_DRIVER);
-    s->driver_cam.apply_exposure = imx179_s5k3p8sp_apply_exposure;
-  }
-
   s->road_cam.device = s->device;
-  s->driver_cam.device = s->device;
+  
 
   s->sm = new SubMaster({"driverState"});
   s->pm = new PubMaster({"roadCameraState", "driverCameraState", "thumbnail"});
@@ -1352,10 +1332,6 @@ void cameras_open(MultiCameraState *s) {
   // err = ioctl(s->ispif_fd, VIDIOC_MSM_ISPIF_CFG, &ispif_cfg_data);
   // LOG("ispif stop: %d", err);
 
-  LOG("*** open driver camera ***");
-  s->driver_cam.ss[0].bufs = s->driver_cam.buf.camera_bufs.get();
-  camera_open(&s->driver_cam, false);
-
   LOG("*** open road camera ***");
   s->road_cam.ss[0].bufs = s->road_cam.buf.camera_bufs.get();
   s->road_cam.ss[1].bufs = s->focus_bufs;
@@ -1382,7 +1358,6 @@ void cameras_open(MultiCameraState *s) {
   ispif_cfg_data.cfg_type = ISPIF_START_FRAME_BOUNDARY;
   cam_ioctl(s->ispif_fd, VIDIOC_MSM_ISPIF_CFG, &ispif_cfg_data, "ispif start_frame_boundary");
 
-  driver_camera_start(&s->driver_cam);
   road_camera_start(&s->road_cam);
 }
 
@@ -1576,13 +1551,11 @@ void cameras_run(MultiCameraState *s) {
   std::vector<std::thread> threads;
   threads.push_back(std::thread(ops_thread, s));
   threads.push_back(start_process_thread(s, &s->road_cam, process_road_camera));
-  threads.push_back(start_process_thread(s, &s->driver_cam, process_driver_camera));
-
-  CameraState* cameras[2] = {&s->road_cam, &s->driver_cam};
+  
+  CameraState* cameras[1] = {&s->road_cam};
 
   while (!do_exit) {
-    struct pollfd fds[2] = {{.fd = cameras[0]->isp_fd, .events = POLLPRI},
-                            {.fd = cameras[1]->isp_fd, .events = POLLPRI}};
+    struct pollfd fds[1] = {{.fd = cameras[0]->isp_fd, .events = POLLPRI}};
     int ret = poll(fds, std::size(fds), 1000);
     if (ret < 0) {
       if (errno == EINTR || errno == EAGAIN) continue;
@@ -1591,7 +1564,7 @@ void cameras_run(MultiCameraState *s) {
     }
 
     // process cameras
-    for (int i=0; i<2; i++) {
+    for (int i=0; i<1; i++) {
       if (!fds[i].revents) continue;
 
       CameraState *c = cameras[i];
